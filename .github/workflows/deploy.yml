@@ -1,0 +1,25 @@
+name: Deploy Static Site
+
+on:
+  workflow_run:
+    workflows: ["Static Site Quality Check"]   # Must match CI workflow name exactly
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Prepare Deployment Artifact
+        run: |
+          echo "Preparing files for deployment..."
+          mkdir deploy
+          rsync -av --exclude=".git" --exclude=".github" ./ deploy/
+
+      - name: Simulate Deployment
+        run: |
+          echo "CD pipeline ready. Server deployment will be added later."
