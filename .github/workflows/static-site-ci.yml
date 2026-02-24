@@ -63,13 +63,11 @@ jobs:
         run: |
           npm install -g broken-link-checker serve
 
-          echo "Starting local server..."
           serve -s . -l 5000 &
-
           sleep 5
 
-          echo "Checking for broken links..."
-          blc http://localhost:5000 --recursive --exclude-external
+          blc http://localhost:5000/index.shtml --recursive --exclude-external
+          blc http://localhost:5000/about.shtml --recursive --exclude-external
       - name: Enforce Max File Size (250KB)
         run: |
           echo "Checking for files larger than 250KB..."
