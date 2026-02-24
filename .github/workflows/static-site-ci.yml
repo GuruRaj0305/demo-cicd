@@ -44,7 +44,6 @@ jobs:
           fi
       - name: Lint CSS
         run: |
-          echo '{ "extends": "stylelint-config-standard" }' > .stylelintrc.json
           FILES=$(find . -type f -name "*.css")
           if [ -n "$FILES" ]; then
             echo "$FILES" | xargs stylelint
