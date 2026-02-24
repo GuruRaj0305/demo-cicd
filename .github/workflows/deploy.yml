@@ -33,7 +33,7 @@ jobs:
           host: ${{ secrets.HOST_IP }}
           username: ec2-user
           key: ${{ secrets.HOST_KEY }}
-          source: "/*"
+          source: "./*"
           target: "/var/www/demo-cicd"
 
       - name: Restart Nginx
