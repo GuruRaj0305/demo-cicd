@@ -1,0 +1,77 @@
+name: Static Site Quality Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node (for lint tools only)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Linters
+        run: |
+          npm install -g htmlhint
+          npm install -g stylelint stylelint-config-standard
+          npm install -g eslint
+
+      - name: Validate HTML / SHTML
+        run: |
+          FILES=$(find . -type f \( -name "*.html" -o -name "*.shtml" \))
+          if [ -n "$FILES" ]; then
+            echo "$FILES" | xargs htmlhint
+          else
+            echo "No HTML files found."
+          fi
+
+      - name: Lint CSS
+        run: |
+          echo '{ "extends": "stylelint-config-standard" }' > .stylelintrc.json
+          FILES=$(find . -type f -name "*.css")
+          if [ -n "$FILES" ]; then
+            echo "$FILES" | xargs stylelint
+          else
+            echo "No CSS files found."
+          fi
+
+      - name: Lint JS
+        run: |
+          echo '{ "env": { "browser": true, "es2021": true }, "extends": "eslint:recommended" }' > .eslintrc.json
+          FILES=$(find . -type f -name "*.js")
+          if [ -n "$FILES" ]; then
+            echo "$FILES" | xargs eslint
+          else
+            echo "No JS files found."
+          fi
+      - name: Check Broken Links
+        run: |
+          npm install -g broken-link-checker
+          
+          echo "Checking for broken links..."
+          blc . --recursive --exclude-external
+      - name: Enforce Max File Size (250KB)
+        run: |
+          echo "Checking for files larger than 250KB..."
+          LARGE_FILES=$(find . -type f \
+            ! -path "./.git/*" \
+            ! -path "./.github/*" \
+            -size +250k)
+
+          if [ -n "$LARGE_FILES" ]; then
+            echo "❌ The following files exceed 250KB:"
+            echo "$LARGE_FILES"
+            exit 1
+          else
+            echo "✅ All files are within 250KB limit."
+          fi
+      
